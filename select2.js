@@ -2748,6 +2748,26 @@ the specific language governing permissions and limitations under the Apache Lic
 
             val.push(id);
             this.setVal(val);
+
+            this.updateSelectionSummary();
+        },
+        
+        updateSelectionSummary: function () {
+            var val = this.getVal(),
+                summary = this.selection.find('.select2-search-choice-summary'),
+                show = this.opts.showSelectionSummary,
+                formatter = this.opts.formatSelectionSummary;
+            
+            if (!show || val.length == 0 || !checkFormatter(formatter, "formatSelectionSummary")) {
+                summary.remove();
+                return;
+            }
+            
+            if (summary.length == 0) {
+                summary = $("<li class='select2-search-choice-summary'></li>").prependTo(this.selection);
+            }
+
+            summary.html(this.opts.escapeMarkup(formatter(val)));
         },
 
         // multi
@@ -2778,6 +2798,8 @@ the specific language governing permissions and limitations under the Apache Lic
                 if (this.select) this.postprocessResults();
             }
             selected.remove();
+
+            this.updateSelectionSummary();
 
             this.opts.element.trigger({ type: "removed", val: this.id(data), choice: data });
             this.triggerChange({ removed: data });
@@ -3071,6 +3093,7 @@ the specific language governing permissions and limitations under the Apache Lic
         dropdownCss: {},
         containerCssClass: "",
         dropdownCssClass: "",
+        showSelectionSummary: false,
         formatResult: function(result, container, query, escapeMarkup) {
             var markup=[];
             markMatch(result.text, query.term, markup, escapeMarkup);
@@ -3090,6 +3113,7 @@ the specific language governing permissions and limitations under the Apache Lic
         formatSelectionTooBig: function (limit) { return "You can only select " + limit + " item" + (limit == 1 ? "" : "s"); },
         formatLoadMore: function (pageNumber) { return "Loading more results..."; },
         formatSearching: function () { return "Searching..."; },
+        formatSelectionSummary: function (values) { var n = values.length; return n == 0 ? '' : n + " item" + (n == 1 ? '' : 's') + " selected:"; },
         minimumResultsForSearch: 0,
         minimumInputLength: 0,
         maximumInputLength: null,
