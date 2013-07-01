@@ -2449,7 +2449,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 //killEvent(e);
                 _this.search[0].focus();
                 _this.selectChoice($(this));
-            })
+            });
 
             // rewrite labels from original element to focusser
             this.search.attr("id", "s2id_autogen"+nextUid());
@@ -2604,6 +2604,10 @@ the specific language governing permissions and limitations under the Apache Lic
 
             this.initContainerWidth();
             this.opts.element.addClass("select2-offscreen");
+            
+            if (this.opts.toggleSelection) {
+                this.dropdown.addClass('select2-toggle-selection');
+            }
 
             // set the placeholder if necessary
             this.clearSearch();
@@ -2690,6 +2694,14 @@ the specific language governing permissions and limitations under the Apache Lic
         isFocused: function () {
             return this.search.hasClass("select2-focused");
         },
+        
+        // multi
+        findHighlightableChoices: function() {
+            if (this.opts.toggleSelection) {
+                return this.results.find(".select2-result-selectable:not(.select2-disabled)");
+            }
+            return this.parent.findHighlightableChoices.apply(this, arguments);
+        },
 
         // multi
         updateSelection: function (data) {
@@ -2726,6 +2738,22 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // multi
         onSelect: function (data, options) {
+            var id = this.id(data),
+                val = this.getVal(),
+                index = indexOf(id, val),
+                self = this;
+            
+            if (this.opts.toggleSelection && index >= 0) {
+                this.selection.find('.select2-search-choice').each(function() {
+                    var choice = $(this),
+                        choiceData = choice.data("select2-data"),
+                        choiceId = self.id(choiceData);
+                    if (id == choiceId) {
+                        self.unselect(choice);
+                    }
+                });
+                return;
+            }
 
             if (!this.triggerSelect(data)) { return; }
 
@@ -2826,7 +2854,9 @@ the specific language governing permissions and limitations under the Apache Lic
         unselect: function (selected) {
             var val = this.getVal(),
                 data,
-                index;
+                id,
+                index,
+                self = this;
 
             selected = selected.closest(".select2-search-choice");
 
@@ -2842,7 +2872,8 @@ the specific language governing permissions and limitations under the Apache Lic
                 return;
             }
 
-            index = indexOf(this.id(data), val);
+            id = this.id(data);
+            index = indexOf(id, val);
 
             if (index >= 0) {
                 val.splice(index, 1);
@@ -2850,6 +2881,26 @@ the specific language governing permissions and limitations under the Apache Lic
                 if (this.select) this.postprocessResults();
             }
             selected.remove();
+            
+            // Using toggle selection behaviour, the drop down may be open when unselecting
+            // Remove the selected class from the matching drop down item if found
+            if (this.opened()) {
+                this.results.find('.select2-selected').each(function() {
+                    var sel = $(this),
+                        selId = self.id(sel.data("select2-data"));
+                    if (id == selId) {
+                        sel.removeClass('select2-selected');
+                    }
+                });
+                this.search.width(10);
+                this.resizeSearch();
+                if (this.getMaximumSelectionSize() > 0 && this.val().length == this.getMaximumSelectionSize() - 1) {
+                    // We were at the maximum selection size but now we are below it, update the results to match
+                    this.updateResults(true);
+                }
+                this.positionDropdown();
+                this.focusSearch();
+            }
 
             this.opts.element.trigger({ type: "removed", val: this.id(data), choice: data });
             this.triggerChange({ removed: data });
@@ -2860,6 +2911,8 @@ the specific language governing permissions and limitations under the Apache Lic
             var val = this.getVal(),
                 choices = this.results.find(".select2-result"),
                 compound = this.results.find(".select2-result-with-children"),
+                toggleSelection = this.opts.toggleSelection,
+                filter,
                 self = this;
 
             choices.each2(function (i, choice) {
@@ -2870,7 +2923,7 @@ the specific language governing permissions and limitations under the Apache Lic
                     choice.find(".select2-result-selectable").addClass("select2-selected");
                 }
             });
-
+            
             compound.each2(function(i, choice) {
                 // hide an optgroup if it doesnt have any selectable children
                 if (!choice.is('.select2-result-selectable')
@@ -2883,9 +2936,10 @@ the specific language governing permissions and limitations under the Apache Lic
                 self.highlight(0);
             }
 
+            filter = toggleSelection ? '.select2-result' : '.select2-result:not(.select2-selected)';
             //If all results are chosen render formatNoMAtches
-            if(!this.opts.createSearchChoice && !choices.filter('.select2-result:not(.select2-selected)').length > 0){
-                if(!data || data && !data.more && this.results.find(".select2-no-results").length === 0) {
+            if (!this.opts.createSearchChoice && !choices.filter(filter).length > 0) {
+                if (!data || data && !data.more && this.results.find(".select2-no-results").length === 0) {
                     if (checkFormatter(self.opts.formatNoMatches, "formatNoMatches")) {
                         this.results.append("<li class='select2-no-results'>" + self.opts.formatNoMatches(self.search.val()) + "</li>");
                     }
