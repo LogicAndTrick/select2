@@ -2861,6 +2861,26 @@ the specific language governing permissions and limitations under the Apache Lic
 
             val.push(id);
             this.setVal(val);
+
+            this.updateSelectionSummary();
+        },
+        
+        updateSelectionSummary: function () {
+            var val = this.getVal(),
+                summary = this.selection.find('.select2-search-choice-summary'),
+                show = this.opts.showSelectionSummary,
+                formatter = this.opts.formatSelectionSummary;
+            
+            if (!show || val.length == 0 || !checkFormatter(formatter, "formatSelectionSummary")) {
+                summary.remove();
+                return;
+            }
+            
+            if (summary.length == 0) {
+                summary = $("<li class='select2-search-choice-summary'></li>").prependTo(this.selection);
+            }
+
+            summary.html(this.opts.escapeMarkup(formatter(val)));
         },
 
         // multi
@@ -2914,6 +2934,8 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.positionDropdown();
                 this.focusSearch();
             }
+
+            this.updateSelectionSummary();
 
             this.opts.element.trigger({ type: "removed", val: this.id(data), choice: data });
             this.triggerChange({ removed: data });
@@ -3214,6 +3236,7 @@ the specific language governing permissions and limitations under the Apache Lic
             properties: { opacity: "hide" },
             options: { duration: 200 }
         },
+        showSelectionSummary: false,
         formatResult: function(result, container, query, escapeMarkup) {
             var markup=[];
             markMatch(result.text, query.term, markup, escapeMarkup);
@@ -3236,6 +3259,7 @@ the specific language governing permissions and limitations under the Apache Lic
         formatPaginationPrevious: function () { return "<"; },
         formatPaginationNext: function () { return ">"; },
         formatSearching: function () { return "Searching..."; },
+        formatSelectionSummary: function (values) { var n = values.length; return n == 0 ? '' : n + " item" + (n == 1 ? '' : 's') + " selected:"; },
         minimumResultsForSearch: 0,
         minimumInputLength: 0,
         maximumInputLength: null,
