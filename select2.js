@@ -2702,7 +2702,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 enabledItem = $(
                     "<li class='select2-search-choice'>" +
                     "    <div></div>" +
-                    "    <a href='#' onclick='return false;' class='select2-search-choice-close' tabindex='-1'></a>" +
+                    "    <span class='select2-search-choice-close'></span>" +
                     "</li>"),
                 disabledItem = $(
                     "<li class='select2-search-choice select2-locked'>" +
@@ -2747,7 +2747,7 @@ the specific language governing permissions and limitations under the Apache Lic
                       $(e.target).closest(".select2-search-choice")
                           .find(".select2-search-choice-close")
                           .click();
-                      e.preventDefault();
+                      killEvent(e);
                   }
               }));
             }
