@@ -2741,6 +2741,15 @@ the specific language governing permissions and limitations under the Apache Lic
                   this.container.addClass("select2-container-active");
                   this.dropdown.addClass("select2-drop-active");
               }));
+              choice.on('mouseup', this.bind(function(e) {
+                  if (e.which == 2) {
+                      // Fire the click event on the close button if middle clicked
+                      $(e.target).closest(".select2-search-choice")
+                          .find(".select2-search-choice-close")
+                          .click();
+                      e.preventDefault();
+                  }
+              }));
             }
 
             choice.data("select2-data", data);
