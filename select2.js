@@ -1390,17 +1390,8 @@ the specific language governing permissions and limitations under the Apache Lic
 
         // abstract
         moveHighlight: function (delta) {
-            var choices = this.findHighlightableChoices(),
-                index = this.highlight();
-
-            while (index > -1 && index < choices.length) {
-                index += delta;
-                var choice = $(choices[index]);
-                if (choice.hasClass("select2-result-selectable") && !choice.hasClass("select2-disabled") && !choice.hasClass("select2-selected")) {
-                    this.highlight(index);
-                    break;
-                }
-            }
+            var index = this.highlight();
+            this.highlight(index + delta);
         },
 
         // abstract
@@ -2554,7 +2545,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 }
 
                 this.open();
-
+                
                 if (e.which === KEY.PAGE_UP || e.which === KEY.PAGE_DOWN) {
                     if (e.shiftKey) {
                         this.loadPage(e.which === KEY.PAGE_UP ? 0 : this.numPages);
