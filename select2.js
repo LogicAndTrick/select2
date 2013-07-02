@@ -2883,7 +2883,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 summary = $("<li class='select2-search-choice-summary'></li>").prependTo(this.selection);
             }
 
-            summary.html(this.opts.escapeMarkup(formatter(val)));
+            summary.html(this.opts.escapeMarkup(formatter(val, this.data())));
         },
 
         // multi
@@ -3262,7 +3262,7 @@ the specific language governing permissions and limitations under the Apache Lic
         formatPaginationPrevious: function () { return "<"; },
         formatPaginationNext: function () { return ">"; },
         formatSearching: function () { return "Searching..."; },
-        formatSelectionSummary: function (values) { var n = values.length; return n == 0 ? '' : n + " item" + (n == 1 ? '' : 's') + " selected:"; },
+        formatSelectionSummary: function (values, data) { var n = values.length; return n == 0 ? '' : n + " item" + (n == 1 ? '' : 's') + " selected:"; },
         minimumResultsForSearch: 0,
         minimumInputLength: 0,
         maximumInputLength: null,
