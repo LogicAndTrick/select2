@@ -2719,6 +2719,7 @@ the specific language governing permissions and limitations under the Apache Lic
             data = filtered;
 
             this.selection.find(".select2-search-choice").remove();
+            this.updateSelectionSummary();
             $(data).each(function () {
                 self.addSelectedChoice(this);
             });
